@@ -46,18 +46,17 @@ while running:
         }
         if len(zombies) < max_spawn:
           zombie_spawn =  pygame.math.Vector2(zsp[random.randint(1, 4)])
-          zombie = {"pos": zombie_spawn}
+          player_pos = pygame.math.Vector2(player.centerx, player.centery)
+          player_dir = player_pos - zombie_spawn
+          player_dir.normalize_ip()
+          zombie = {"pos": zombie_spawn, "dir": player_dir}
           zombies.append(zombie)
         #zombie logic
         for zombie in zombies[:]:
-            if zombie["pos"].x < player.centerx:
-                zombie["pos"].x += 2
-            if zombie["pos"].x > player.centerx:
-                zombie["pos"].x -= 2
-            if zombie["pos"].y < player.centery:
-                zombie["pos"].y += 2
-            if zombie["pos"].y > player.centery:
-                zombie["pos"].y -= 2
+            player_pos = pygame.math.Vector2(player.centerx, player.centery)
+            zombie["dir"] = player_pos - zombie["pos"]
+            zombie["dir"].normalize_ip()
+            zombie["pos"] += zombie["dir"] * 2
             pygame.draw.rect(screen, (0,225,0), (int(zombie["pos"].x), int(zombie["pos"].y), 50, 50))
         for zombie in zombies:
             zombie_rect = pygame.Rect(zombie["pos"].x, zombie["pos"].y, 50, 50)
@@ -100,6 +99,8 @@ while running:
     #game over text
     if game_over:
         screen.blit(text, (300, 250))
+        end_score = font_score.render(f"score: {score}", True, (255, 0, 0))
+        screen.blit(end_score, (370, 290))
     #restart game
     if game_over and keys[pygame.K_SPACE]:
         last_shot = 0
